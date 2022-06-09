@@ -6,8 +6,10 @@
 	#  "local"	copies to a location on your Pi.
 	#  "ftp"	uploads to an FTP server.
 	#		See the section for ftp PROTOCOL below.
+	#  "ftps"	uploads to an FTP server that supports secure FTP transfer.
+	# 		*** Use "ftps" instead of "ftp" if you can - it's more secure than ftp. ***
+	#		See the section for ftp PROTOCOL below.
 	#  "sftp"	(SSH file transfer) - uploads to an FTP server that supports secure transfer.
-	# 		Use "sftp" instead of "ftp" if you can - it's more secure.
 	#		See the section for sftp PROTOCOL below.
 	#  "scp"	(secure copy) - copies to a remote server.
 	#		See the section for scp PROTOCOL below.   NOTE: "scp" PROTOCOL IS NOT IMPLEMENTED YET.
@@ -42,6 +44,7 @@ PROTOCOL=""
 
 	# The remote directory where the current "image.jpg" file be copied to.
 IMAGE_DIR=""
+WEB_IMAGE_DIR=""
 
 	# The remote directory where the timelapse video should be uploaded to.
 	# Some people prefer to put timelapse, keogram, and startrails in separate directories.
@@ -62,12 +65,8 @@ STARTRAILS_DIR=""
 STARTRAILS_DESTINATION_NAME=""
 WEB_STARTRAILS_DIR=""
 
-# These are for for backwards compatibility and will be removed in the future. DO NOT CHANGE!
-IMGDIR="${IMAGE_DIR}"
-MP4DIR="${VIDEOS_DIR}"
 
-
-############### ftp, sftp, and scp PROTOCOLS only:
+############### ftp, ftps, sftp, and scp PROTOCOLS only:
 	# Enter the name of the remote server.  If you don't know it, ask your service provider.
 REMOTE_HOST=""
 
@@ -78,10 +77,10 @@ REMOTE_USER=""
 REMOTE_PASSWORD=""
 
 	# If you need special commands executed when connecting to the FTP server enter them here.
-	# For example, to allow lftp to work with unknown certificates, use:
-	#	  LFTP_COMMANDS="set ssl:check-hostname false"
+	# See the Wiki (https://github.com/thomasjacquin/allsky/wiki/11-Troubleshooting:-uploads)
+	# for example commands to enter into LFTP_COMMANDS.
 	# If you have more than one command to enter, separate them with semicolons (;).
-	# Does not apply to PROTOCOL=scp.
+	# This setting does not apply to the "scp" PROTOCOL.
 LFTP_COMMANDS=""
 
 

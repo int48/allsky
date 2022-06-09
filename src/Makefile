@@ -39,7 +39,7 @@ ifneq ($(PKGPATH),)
   OPENCV = $(shell pkg-config --exists opencv && pkg-config --cflags --libs opencv || (pkg-config --exists opencv4 && pkg-config --cflags --libs opencv4))
 endif
 DEFS = -D_LIN -D_DEBUG -DGLIBC_20
-CFLAGS = -Wall -Wno-psabi -Wno-unused-result -g -O2 -lpthread
+CFLAGS = -Werror -Wall -Wno-psabi -Wno-unused-result -g -O2 -lpthread
 
 ifeq ($(platform), armv6l)
   CC = arm-linux-gnueabihf-g++
@@ -92,7 +92,7 @@ deps:
 else
 deps:
 	@echo `date +%F\ %R:%S` Installing build dependencies...
-	@apt update && apt -y install libopencv-dev libusb-dev libusb-1.0-0-dev ffmpeg gawk lftp jq imagemagick
+	@apt update && apt -y install libopencv-dev libusb-dev libusb-1.0-0-dev ffmpeg gawk lftp jq imagemagick bc
 endif
 
 .PHONY : deps
@@ -107,32 +107,42 @@ ifeq (,$(OPENCV))
 endif
 .PHONY : check_deps
 
-
-sunwait:
+patchsunwait:
 	@echo `date +%F\ %R:%S` Initializing sunwait submodule...
 	@git submodule init
 	@git submodule update
+	@echo `date +%F\ %R:%s` Patching sunwait compile warnings...
+	@patch -p1 -d sunwait-src/ < sunwait.patch
+	@touch patchsunwait
+
+sunwait: patchsunwait
 	@echo `date +%F\ %R:%S` Building sunwait...
 	@$(MAKE) -C sunwait-src
 	@cp sunwait-src/sunwait .
 	@echo `date +%F\ %R:%S` Done.
 
-capture:check_deps capture.cpp
+allsky_common.o: allsky_common.cpp include/allsky_common.h
+	@$(CC) -c  allsky_common.cpp -o $@ $(CFLAGS) $(OPENCV)
+
+mode_RPiHQ_mean.o: mode_RPiHQ_mean.cpp
+	@$(CC) -c  mode_RPiHQ_mean.cpp -o $@ $(CFLAGS) $(OPENCV)
+
+capture:capture.cpp allsky_common.o
 	@echo `date +%F\ %R:%S` Building $@ program...
-	@$(CC)  $@.cpp -o $@ $(CFLAGS) $(OPENCV) -lASICamera2 $(USB)
+	@$(CC)  $@.cpp -o $@ $(CFLAGS) $(OPENCV) -lASICamera2 $(USB) allsky_common.o
 	@echo `date +%F\ %R:%S` Done.
 
-capture_RPiHQ:check_deps capture_RPiHQ.cpp
+capture_RPiHQ:capture_RPiHQ.cpp allsky_common.o mode_RPiHQ_mean.o
 	@echo `date +%F\ %R:%S` Building $@ program...
-	@$(CC)  $@.cpp -o $@ $(CFLAGS) $(OPENCV)
+	@$(CC)  $@.cpp -o $@ mode_RPiHQ_mean.o $(CFLAGS) $(OPENCV) allsky_common.o
 	@echo `date +%F\ %R:%S` Done.
 
-keogram:check_deps keogram.cpp
+keogram:keogram.cpp
 	@echo `date +%F\ %R:%S` Building $@ program...
 	@$(CC) $@.cpp -o $@ $(CFLAGS) $(OPENCV)
 	@echo `date +%F\ %R:%S` Done.
 
-startrails:check_deps startrails.cpp
+startrails:startrails.cpp
 	@echo `date +%F\ %R:%S` Building $@ program...
 	@$(CC) $@.cpp -o $@ $(CFLAGS) $(OPENCV)
 	@echo `date +%F\ %R:%S` Done.
@@ -148,7 +158,7 @@ symlink: all
 
 ifneq ($(ROOTCHECK), 0)
 install uninstall:
-	@echo This must be ran with root permissions.
+	@echo This must be run with root permissions.
 	@echo Please run \'sudo make $@\'
 else
 install:

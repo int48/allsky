@@ -1,3 +1,4 @@
+documentation/*
 images/*
 config.sh
 darks/*
@@ -19,6 +20,8 @@ scripts/startrails_manual.sh
 scripts/startrails_only.sh
 scripts/stretch.sh
 scripts/endOfNight_additionalSteps.sh
+scripts/saveImageDay.sh
+scripts/saveImageNight.sh
 settings_RPiHQ.json
 settings_ZWO.json
 
@@ -36,3 +39,8 @@ capture_RPiHQ
 keogram
 startrails
 sunwait
+
+# misc
+.vscode/configurationCache.log
+.vscode/targets.log
+.vscode/dryrun.log

@@ -9,16 +9,18 @@ if [ "${ALLSKY_VARIABLE_SET}" = "" ]; then
 
 	ALLSKY_VARIABLE_SET="true"	# so we only do the following once
 
-	ME="$(basename "${BASH_ARGV0}")"
+	ME2="$(basename "${BASH_SOURCE[0]}")"
 
 	# Set colors used by many scripts in output.
 	# If we're not on a tty output is likely being written to a file, so don't use colors.
 	if tty --silent ; then
+		ON_TTY=1
 		RED="\033[0;31m"
 		GREEN="\033[0;32m"
 		YELLOW="\033[0;33m"
 		NC="\033[0m" # No Color
 	else
+		ON_TTY=0
 		RED=""
 		GREEN=""
 		YELLOW=""
@@ -27,7 +29,7 @@ if [ "${ALLSKY_VARIABLE_SET}" = "" ]; then
 
 	if [ "${ALLSKY_HOME}" = "" ] ; then	# This must come after setting colors above
 		echo -en "${RED}"
-		echo -n "${ME}: ERROR: ALLSKY_HOME not set!  Exiting..."
+		echo -n "${ME2}: ERROR: ALLSKY_HOME not set!  Exiting..."
 		echo -e "${NC}"
 		exit 1
 	fi
@@ -48,13 +50,17 @@ if [ "${ALLSKY_VARIABLE_SET}" = "" ]; then
 
 	# Holds all the notification images.
 	ALLSKY_NOTIFICATION_IMAGES="${ALLSKY_NOTIFICATION_IMAGES:-${ALLSKY_HOME}/notification_images}"
+	# Holds log of notifications displayed during this session.
+	ALLSKY_NOTIFICATION_LOG="${ALLSKY_TMP}/notification_log.txt"
 
 	# Holds all the dark frames.
 	ALLSKY_DARKS="${ALLSKY_DARKS:-${ALLSKY_HOME}/darks}"
 
 	# Location of optional allsky-portal package.
-	PORTAL_DIR=${PORTAL_DIR:-/var/www/html}
+	ALLSKY_WEBUI=${ALLSKY_WEBUI:-/var/www/html}
+	PORTAL_DIR=${ALLSKY_WEBUI}		# old name - will eventually remove this
 
 	# Location of optional allsky-website package.
-	WEBSITE_DIR=${WEBSITE_DIR:-${PORTAL_DIR}/allsky}
+	ALLSKY_WEBSITE=${ALLSKY_WEBSITE:-${ALLSKY_WEBUI}/allsky}
+	WEBSITE_DIR=${ALLSKY_WEBSITE}		# old name - will eventually remove this
 fi
